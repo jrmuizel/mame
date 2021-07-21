@@ -374,17 +374,18 @@ void lwriter_state::fifo_out_w(uint8_t data)
  */
 uint8_t lwriter_state::via_pa_r()
 {
-	logerror(" VIA: Port A read!\n");
 	uint8_t result = m_dsw1->read();
 	if (m_sbsy) {
 		result |= 2;
 	}
 	result |= (m_print_sc << 7);
+	printf(" VIA: Port A read! %x\n", result);
 	return result | 0x1C;
 }
 
 void lwriter_state::via_pa_w(uint8_t data)
 {
+	m_cbsy = data & 1;
 	logerror(" VIA: Port A written with data of 0x%02x!\n", data);
 }
 
@@ -395,8 +396,8 @@ WRITE_LINE_MEMBER(lwriter_state::via_ca2_w)
 
 uint8_t lwriter_state::via_pb_r()
 {
-	logerror(" VIA: Port B read!\n");
-	return 0xFF;
+	printf(" VIA: Port B read! 0xef\n");
+	return 0xFB;
 }
 
 void lwriter_state::via_pb_w(uint8_t data)
@@ -454,11 +455,12 @@ WRITE_LINE_MEMBER(lwriter_state::scc_int)
 #define EC6 0x4c
 #define EC7 0x4f
 #define EC14 0x5d
-
+#define logerror printf
 void lwriter_state::write_dtr(int state) {
 	// DTR seems to be used as a clock for communication with
 	// the print controller. We arbitrarily choose state == 1
 	// to run our code
+        logerror("DTR write\n");
 	if (state == 1 && (m_cbsy || m_sbsy)) {
 		logerror("pb line %d %d %d!\n", m_via_pb & 1, m_print_state, m_print_bit);
 		switch (m_print_state) {
@@ -579,14 +581,14 @@ void lwriter_state::lwriter(machine_config &config)
 
 ROM_START(lwriter)
 	ROM_REGION16_BE( 0x200000, "rom", ROMREGION_ERASEFF )
-	ROM_LOAD16_BYTE("342-0545.l0", 0x000001, 0x20000, CRC (6431742d) SHA1 (040bd5b84b49b86f2b0fe9ece378bbc7a10a94ec)) // Label: "342-0545-A JAPAN // TC531000CP-F700 // (C) 87 APPLE 8940EAI // (C) 83-87 ADOBE V47.0 // (C) 81 LINOTYPE" TC531000 @L0
-	ROM_LOAD16_BYTE("342-0546.h0", 0x000000, 0x20000, CRC (c592bfb7) SHA1 (b595ae225238f7fabd1566a3133ea6154e082e2d)) // Label: "342-0546-A JAPAN // TC531000CP-F701 // (C) 87 APPLE 8940EAI // (C) 83-87 ADOBE V47.0 // (C) 81 LINOTYPE" TC531000 @H0
-	ROM_LOAD16_BYTE("342-0547.l1", 0x040001, 0x20000, CRC (205a5ea8) SHA1 (205fefbb5c67a07d57cb6184c69648321a34a8fe)) // Label: "342-0547-A JAPAN // TC531000CP-F702 // (C) 87 APPLE 8940EAI // (C) 83-87 ADOBE V47.0 // (C) 81 LINOTYPE" TC531000 @L1
-	ROM_LOAD16_BYTE("342-0548.h1", 0x040000, 0x20000, CRC (f616e1c3) SHA1 (b9e2cd4d07990b2d1936be97b6e89ef21f06b462)) // Label: "342-0548-A JAPAN // TC531000CP-F703 // (C) 87 APPLE 8940EAI // (C) 83-87 ADOBE V47.0 // (C) 81 LINOTYPE" TC531000 @H1
-	ROM_LOAD16_BYTE("342-0549.l2", 0x080001, 0x20000, CRC (0b0b051a) SHA1 (64a80085001570c3f99d9865031715bf49bd7698)) // Label: "342-0549-A JAPAN // TC531000CP-F704 // (C) 87 APPLE 8940EAI // (C) 83-87 ADOBE V47.0 // (C) 81 LINOTYPE" TC531000 @L2
-	ROM_LOAD16_BYTE("342-0550.h2", 0x080000, 0x20000, CRC (82adcf85) SHA1 (e2ab728afdae802c0c67fc25c9ba278b9cb04e31)) // Label: "342-0550-A JAPAN // TC531000CP-F705 // (C) 87 APPLE 8940EAI // (C) 83-87 ADOBE V47.0 // (C) 81 LINOTYPE" TC531000 @H2
-	ROM_LOAD16_BYTE("342-0551.l3", 0x0c0001, 0x20000, CRC (176b3346) SHA1 (eb8dfc7e44f2bc884097e51a47e2f10ee091c9e9)) // Label: "342-0551-A JAPAN // TC531000CP-F706 // (C) 87 APPLE 8940EAI // (C) 83-87 ADOBE V47.0 // (C) 81 LINOTYPE" TC531000 @L3
-	ROM_LOAD16_BYTE("342-0552.h3", 0x0c0000, 0x20000, CRC (69b175c6) SHA1 (a84c82be1ec7e373bb097ee74b941920a3b091aa)) // Label: "342-0552-A JAPAN // TC531000CP-F707 // (C) 87 APPLE 8940EAI // (C) 83-87 ADOBE V47.0 // (C) 81 LINOTYPE" TC531000 @H3
+	ROM_LOAD16_BYTE("342-0568a.rom", 0x000001, 0x10000, CRC (83341c75) SHA1 (d7c65d09abaaf862fef00ac4df7a094ddedd24c5)) // Label: "342-0545-A JAPAN // TC531000CP-F700 // (C) 87 APPLE 8940EAI // (C) 83-87 ADOBE V47.0 // (C) 81 LINOTYPE" TC531000 @L0
+	ROM_LOAD16_BYTE("342-0569a.rom", 0x000000, 0x10000, CRC (47d33a6b) SHA1 (0e79fa9204f9be6539abcdb619a17a4ced912b13)) // Label: "342-0546-A JAPAN // TC531000CP-F701 // (C) 87 APPLE 8940EAI // (C) 83-87 ADOBE V47.0 // (C) 81 LINOTYPE" TC531000 @H0
+	ROM_LOAD16_BYTE("342-0570a.rom", 0x020001, 0x10000, CRC (38753dd2) SHA1 (931eb3386fe0fff1de1311b2bc1cee8ee02ed599)) // Label: "342-0547-A JAPAN // TC531000CP-F702 // (C) 87 APPLE 8940EAI // (C) 83-87 ADOBE V47.0 // (C) 81 LINOTYPE" TC531000 @L1
+	ROM_LOAD16_BYTE("342-0571a.rom", 0x020000, 0x10000, CRC (08888acd) SHA1 (f771306d8f876e6e4ed14f3c6e5b71dff75cf49e)) // Label: "342-0548-A JAPAN // TC531000CP-F703 // (C) 87 APPLE 8940EAI // (C) 83-87 ADOBE V47.0 // (C) 81 LINOTYPE" TC531000 @H1
+	ROM_LOAD16_BYTE("342-0572a.rom", 0x040001, 0x10000, CRC (0a64af91) SHA1 (22cd61ed7c2f64bfd4ddbd7b5cde64311a3db5e6)) // Label: "342-0549-A JAPAN // TC531000CP-F704 // (C) 87 APPLE 8940EAI // (C) 83-87 ADOBE V47.0 // (C) 81 LINOTYPE" TC531000 @L2
+	ROM_LOAD16_BYTE("342-0573a.rom", 0x040000, 0x10000, CRC (f8e529fe) SHA1 (8a4511a4c12eb24c731e1de747886aacfa2057d5)) // Label: "342-0550-A JAPAN // TC531000CP-F705 // (C) 87 APPLE 8940EAI // (C) 83-87 ADOBE V47.0 // (C) 81 LINOTYPE" TC531000 @H2
+	ROM_LOAD16_BYTE("342-0574a.rom", 0x060001, 0x10000, CRC (bb694699) SHA1 (2e208b30e8d05725f7e8b469974b6357008fbb1d)) // Label: "342-0551-A JAPAN // TC531000CP-F706 // (C) 87 APPLE 8940EAI // (C) 83-87 ADOBE V47.0 // (C) 81 LINOTYPE" TC531000 @L3
+	ROM_LOAD16_BYTE("342-0575a.rom", 0x060000, 0x10000, CRC (c21c1d22) SHA1 (9fc6cd059380c11588c182fb8ec6422e5db472e1)) // Label: "342-0552-A JAPAN // TC531000CP-F707 // (C) 87 APPLE 8940EAI // (C) 83-87 ADOBE V47.0 // (C) 81 LINOTYPE" TC531000 @H3
 	ROM_REGION16_BE( 0x1000, "sram", ROMREGION_ERASEFF )
 
 ROM_END
